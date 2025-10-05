@@ -1,0 +1,66 @@
+spring:
+  application:
+    name: event-replay-dlq-system
+
+  #POSTGRESDB
+  datasource:
+    url: jdbc:postgresql://localhost:5432/eventstore
+    username: eventuser
+    password: eventpass
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  #KAFKA
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 3
+    consumer:
+      group-id: event-processor-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest # begin reading from the earliest available offset in each topic partition
+      properties:
+        spring.json.trusted.packages: "*"
+
+  flyway:
+    enabled: false
+
+  #REDIS
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 2000ms
+
+#SERVER PORT
+server:
+  port: 8080
+
+
+#LOGGING
+logging:
+  level:
+    com.example.event_replay_dlq_system: DEBUG
+    org.springframework.kafka: INFO
+    org.hibernate.sql: DEBUG
+
+#ACTUATOR
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
