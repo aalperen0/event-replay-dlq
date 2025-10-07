@@ -30,10 +30,10 @@ public class Event extends BaseEntity {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String payload;
 
-    @Column(name = "source_system")
+    @Column(name = "source_system", length = 100)
     private String sourceSystem;
 
-    @Column(name = "correlation_id")
+    @Column(name = "correlation_id", length = 255)
     private String correlationId;
 
     @Column(nullable = false)
