@@ -2,6 +2,7 @@ package com.example.event_replay_dlq_system.service;
 
 
 import com.example.event_replay_dlq_system.dto.EventDetailResponse;
+import com.example.event_replay_dlq_system.dto.EventProcessingLogResponse;
 import com.example.event_replay_dlq_system.dto.EventPublishRequestDTO;
 import com.example.event_replay_dlq_system.dto.EventPublishResponseDTO;
 import com.example.event_replay_dlq_system.entity.Event;
@@ -16,6 +17,7 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -39,11 +41,10 @@ public class EventPublisherService {
     }
 
     /**
-     *  Creates an event and save to the database
-     *  Later it will be published to kafka
-     *  Update status of Event
-     *  Add to the log
-     *
+     * Creates an event and save to the database
+     * Later it will be published to kafka
+     * Update status of Event
+     * Add to the log
      *
      * @param
      * @return eventID, status of event, success/error message, time
@@ -85,10 +86,10 @@ public class EventPublisherService {
      * @return event
      */
 
-    public EventDetailResponse getEventByID(UUID eventId) {
-        return eventRepository.getEventByEventId(eventId.toString())
+    public EventDetailResponse getEventByID(String eventId) {
+        return eventRepository.getEventByEventId(eventId)
                 .map(EventMapper::toEventDetailResponse)
-                .orElseThrow(() -> new EventNotFoundException("event not found with id " + eventId.toString()));
+                .orElseThrow(() -> new EventNotFoundException("event not found with id " + eventId));
 
     }
 
@@ -105,11 +106,22 @@ public class EventPublisherService {
 
     }
 
+    /**
+     * return current
+     *
+     * @param eventId
+     * @return
+     */
 
-    public EventPublishResponseDTO getEventProcessingStatus(UUID eventId) {
-        return eventRepository.getEventByEventId(eventId.toString())
-                .map(EventMapper::mapToEventPublishResponseDTO)
-                .orElseThrow(() -> new EventNotFoundException("event not found with id " + eventId.toString()));
+    public List<EventProcessingLogResponse> getEventProcessingStatus(String eventId) {
+        List<EventProcessingLog> logs = eventProcessingLogRepository.getByEventId(eventId);
+
+        if (logs.isEmpty()) {
+            throw new EventNotFoundException("event not found with id " + eventId);
+        }
+        return logs.stream()
+                .map(EventMapper::toProcessingLogResponse)
+                .toList();
     }
 
 }

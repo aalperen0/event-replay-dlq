@@ -24,6 +24,7 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
       retries: 3
     consumer:
       group-id: event-processor-group
@@ -46,6 +47,14 @@ spring:
 #SERVER PORT
 server:
   port: 8080
+
+event-system:
+  kafka:
+    topics:
+      events: "events-topic"
+      retry: "events-retry-topic"
+      dlq: "events-dlq-topic"
+      replay: "events-replay-topic"
 
 
 #LOGGING

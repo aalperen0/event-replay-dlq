@@ -1,6 +1,7 @@
 package com.example.event_replay_dlq_system.mapper;
 
 import com.example.event_replay_dlq_system.dto.EventDetailResponse;
+import com.example.event_replay_dlq_system.dto.EventProcessingLogResponse;
 import com.example.event_replay_dlq_system.dto.EventPublishRequestDTO;
 import com.example.event_replay_dlq_system.dto.EventPublishResponseDTO;
 import com.example.event_replay_dlq_system.entity.Event;
@@ -14,6 +15,28 @@ import java.util.UUID;
 
 public class EventMapper {
 
+    /**
+     * convert incoming request to event entity
+     * @param eventpublishRequestDTO
+     * @return event entity
+     */
+
+    public static Event mapToEventEntity(EventPublishRequestDTO eventpublishRequestDTO) {
+        Event event = new Event();
+        event.setEventId(UUID.randomUUID().toString());
+        event.setEventType(eventpublishRequestDTO.getEventType());
+        event.setPayload(eventpublishRequestDTO.getPayload());
+        event.setSourceSystem(eventpublishRequestDTO.getSourceSystem());
+        event.setCorrelationId(eventpublishRequestDTO.getCorrelationId());
+        event.setVersion(1);
+        return event;
+    }
+
+    /**
+     *
+     * @param event
+     * @return event fields
+     */
     public static EventDetailResponse toEventDetailResponse(Event event) {
         return EventDetailResponse.builder()
                 .eventId(event.getEventId())
@@ -27,20 +50,11 @@ public class EventMapper {
                 .build();
     }
 
-    public static Event mapToEventEntity(EventPublishRequestDTO eventpublishRequestDTO) {
-        Event event = new Event();
-        event.setEventId(UUID.randomUUID().toString());
-        event.setEventType(eventpublishRequestDTO.getEventType());
-        event.setPayload(eventpublishRequestDTO.getPayload());
-        event.setSourceSystem(eventpublishRequestDTO.getSourceSystem());
-        event.setCorrelationId(eventpublishRequestDTO.getCorrelationId());
-        event.setVersion(1);
-        return event;
-    }
+
 
     public static EventProcessingLog processEventLog(Event event, ProcessingStatus processingStatus) {
         EventProcessingLog eventProcessingLog = new EventProcessingLog();
-        String processorName = event.getSourceSystem() != null ? eventProcessingLog.getProcessorName() + "-processor" : "default-processor";
+        String processorName = event.getSourceSystem() != null ? event.getSourceSystem() + "-processor" : "default-processor";
 
         eventProcessingLog.setEventId(event.getEventId());
         eventProcessingLog.setProcessorName(processorName);
@@ -56,7 +70,7 @@ public class EventMapper {
      * Convert Event to the response
      *
      * @param event
-     * @return EventPublishResponseDTO
+     * @return current situation of event
      */
     public static EventPublishResponseDTO mapToEventPublishResponseDTO(Event event) {
         return EventPublishResponseDTO.builder()
@@ -64,6 +78,20 @@ public class EventMapper {
                 .status("PUBLISHED")
                 .message("Event published successfully")
                 .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+    public static EventProcessingLogResponse toProcessingLogResponse(EventProcessingLog log) {
+        return EventProcessingLogResponse.builder()
+                .eventId(log.getEventId())
+                .processorName(log.getProcessorName())
+                .status(log.getStatus().name())
+                .attemptCount(log.getAttemptCount())
+                .maxAttempts(log.getMaxAttempts())
+                .errorMessage(log.getErrorMessage())
+                .processingStartTime(log.getProcessingStartTime())
+                .processingEndTime(log.getProcessingEndTime())
+                .nextRetryTime(log.getNextRetryTime())
                 .build();
     }
 

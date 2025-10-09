@@ -22,7 +22,6 @@ public class EventDetailResponse {
     private String payload;
     private String sourceSystem;
     private String correlationId;
-    private ProcessingStatus processingStatus;
     private int version;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
