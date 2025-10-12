@@ -30,13 +30,13 @@ import java.util.UUID;
 public class EventPublisherService {
 
     private final EventRepository eventRepository;
-    // private final KafkaProducer kafkaProducer;
+    private final KafkaProducerService kafkaProducerService;
     private final EventProcessingLogRepository eventProcessingLogRepository;
 
     @Autowired
-    public EventPublisherService(EventRepository eventRepository, EventProcessingLogRepository eventProcessingLogRepository) {
+    public EventPublisherService(EventRepository eventRepository, EventProcessingLogRepository eventProcessingLogRepository,  KafkaProducerService kafkaProducerService) {
         this.eventRepository = eventRepository;
-        //       this.kafkaProducer = kafkaProducer;
+        this.kafkaProducerService = kafkaProducerService;
         this.eventProcessingLogRepository = eventProcessingLogRepository;
     }
 
@@ -59,13 +59,12 @@ public class EventPublisherService {
             event = eventRepository.save(event);
 
 
-            // publish kafka later
-            log.info("Creating event with id {}", event.getEventId());
 
 
-            ProcessingStatus processingStatus = ProcessingStatus.PENDING;
-            EventProcessingLog eventProcessingLog = EventMapper.processEventLog(event, processingStatus);
-            eventProcessingLogRepository.save(eventProcessingLog);
+
+            kafkaProducerService.sendEvent(event);
+
+
 
             return EventMapper.mapToEventPublishResponseDTO(event);
 

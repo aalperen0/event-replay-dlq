@@ -26,6 +26,8 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       acks: all
       retries: 3
+      properties:
+        enable.idempotence: true
     consumer:
       group-id: event-processor-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
@@ -33,6 +35,9 @@ spring:
       auto-offset-reset: earliest # begin reading from the earliest available offset in each topic partition
       properties:
         spring.json.trusted.packages: "*"
+
+    listener:
+      ack-mode: manual
 
   flyway:
     enabled: false

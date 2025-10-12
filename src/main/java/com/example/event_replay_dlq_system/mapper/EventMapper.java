@@ -17,7 +17,8 @@ public class EventMapper {
 
     /**
      * convert incoming request to event entity
-     * @param eventpublishRequestDTO
+     *
+     * @param eventpublishRequestDTO Event Request DTO
      * @return event entity
      */
 
@@ -34,7 +35,7 @@ public class EventMapper {
 
     /**
      *
-     * @param event
+     * @param event Event
      * @return event fields
      */
     public static EventDetailResponse toEventDetailResponse(Event event) {
@@ -51,10 +52,9 @@ public class EventMapper {
     }
 
 
-
-    public static EventProcessingLog processEventLog(Event event, ProcessingStatus processingStatus) {
+    public static EventProcessingLog processEventLog(Event event, ProcessingStatus processingStatus, String processorName) {
         EventProcessingLog eventProcessingLog = new EventProcessingLog();
-        String processorName = event.getSourceSystem() != null ? event.getSourceSystem() + "-processor" : "default-processor";
+        //String processorName = event.getSourceSystem() != null ? event.getSourceSystem() + "-processor" : "default-processor";
 
         eventProcessingLog.setEventId(event.getEventId());
         eventProcessingLog.setProcessorName(processorName);
@@ -69,7 +69,7 @@ public class EventMapper {
     /**
      * Convert Event to the response
      *
-     * @param event
+     * @param event Event$A
      * @return current situation of event
      */
     public static EventPublishResponseDTO mapToEventPublishResponseDTO(Event event) {
@@ -80,6 +80,7 @@ public class EventMapper {
                 .timestamp(LocalDateTime.now())
                 .build();
     }
+
 
     public static EventProcessingLogResponse toProcessingLogResponse(EventProcessingLog log) {
         return EventProcessingLogResponse.builder()

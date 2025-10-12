@@ -48,8 +48,8 @@ public class OrderEventProcessor implements EventProcessor {
             log.info("Processing order event: {} with correlationID: {}", event, event.getCorrelationId());
 
             JsonNode orderJson = objectMapper.readTree(event.getPayload());
-            String orderId = orderJson.get("order_id").asText();
-            String customerId = orderJson.get("customer_id").asText();
+            String orderId = orderJson.get("orderId").asText();
+            String customerId = orderJson.get("customerId").asText();
             double amount = orderJson.get("amount").asDouble();
 
             if (amount <= 0) {
