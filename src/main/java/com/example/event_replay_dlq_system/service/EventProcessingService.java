@@ -1,18 +1,15 @@
-package com.example.event_replay_dlq_system.processor;
-
+package com.example.event_replay_dlq_system.service;
 
 import com.example.event_replay_dlq_system.entity.Event;
 import com.example.event_replay_dlq_system.entity.EventProcessingLog;
 import com.example.event_replay_dlq_system.enums.ProcessingStatus;
 import com.example.event_replay_dlq_system.exception.ProcessingException;
 import com.example.event_replay_dlq_system.mapper.EventMapper;
+import com.example.event_replay_dlq_system.processor.EventProcessor;
 import com.example.event_replay_dlq_system.repository.EventProcessingLogRepository;
-import com.example.event_replay_dlq_system.service.RedisLockService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.consumer.internals.Acknowledgements;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
@@ -20,24 +17,25 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-@Slf4j
 @Service
-public class EventProcessorConsumer {
-
-
+@Slf4j
+public class EventProcessingService {
     private final EventProcessingLogRepository eventProcessingLogRepository;
     private final RedisLockService redisLockService;
     private final List<EventProcessor> processors;
+    private final RetrySchedulerService retrySchedulerService;
 
 
-    public EventProcessorConsumer(EventProcessingLogRepository eventProcessingLogRepository, RedisLockService redisLockService, List<EventProcessor> processors) {
+    @Autowired
+    public EventProcessingService(EventProcessingLogRepository eventProcessingLogRepository, RedisLockService redisLockService, List<EventProcessor> processors, RetrySchedulerService retrySchedulerService) {
         this.eventProcessingLogRepository = eventProcessingLogRepository;
         this.redisLockService = redisLockService;
         this.processors = processors;
+        this.retrySchedulerService = retrySchedulerService;
     }
 
-    @KafkaListener(topics = "${event-system.kafka.topics.events}", groupId = "event-processor-group")
-    public void consumeEvent(Event event, Acknowledgment ack) {
+
+    public void processEvent(Event event, Acknowledgment ack) {
 
         log.info("Received event: {} (type: {})", event.getEventId(), event.getEventType());
 
@@ -110,8 +108,8 @@ public class EventProcessorConsumer {
     /**
      *
      * @param event TYPE OF event
-     * @param ack Manually acknowledge
-     * @param lock which lock to proceed
+     * @param ack   Manually acknowledge
+     * @param lock  which lock to proceed
      * @return true if redis acquire lock successfully, else false
      */
 
@@ -139,7 +137,7 @@ public class EventProcessorConsumer {
     }
 
     /**
-     * Check existing log based on event and processorname
+     * Check existing log based on event and processor name
      * if it exists get the log
      * otherwise create a one.
      *
@@ -147,7 +145,7 @@ public class EventProcessorConsumer {
      * @param processorName Determine processor name
      * @return save it  event processing log to db
      */
-    private EventProcessingLog findOrCreateProcessingLog(Event event, String processorName) {
+    public EventProcessingLog findOrCreateProcessingLog(Event event, String processorName) {
         Optional<EventProcessingLog> existingLog = eventProcessingLogRepository.getByEventIdAndProcessorName(event.getEventId(), processorName);
         if (existingLog.isPresent()) {
             return existingLog.get();
@@ -174,13 +172,14 @@ public class EventProcessorConsumer {
         eLog.setErrorMessage(e.getMessage());
         eLog.setProcessingEndTime(LocalDateTime.now());
 
+
         if (eLog.getAttemptCount() < eLog.getMaxAttempts()) {
-            log.info("Processing failed for event, will retry in later {}", event.getEventId());
+            log.info("Processing failed for event, will retry (attempt {}/{})", eLog.getAttemptCount(), eLog.getMaxAttempts());
             eLog.setStatus(ProcessingStatus.RETRY);
 
-            // .........................
-            // TODO: Schedule  Retry
-            // .........................
+
+            retrySchedulerService.scheduleRetry(event, processorName, eLog.getAttemptCount());
+
         } else {
             log.warn("Max attempts reached, moving to DLQ {}", event.getEventId());
             eLog.setStatus(ProcessingStatus.DLQ);
@@ -194,9 +193,4 @@ public class EventProcessorConsumer {
 
 
     }
-
-
 }
-
-
-

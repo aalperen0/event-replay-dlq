@@ -6,5 +6,5 @@ public enum ReplaySessionStatus {
     PAUSED,
     COMPLETED,
     FAILED,
-    CANCELED
+    CANCELLED
 }

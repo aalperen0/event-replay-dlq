@@ -35,7 +35,7 @@ public class KafkaProducerService {
      * send it
      * logging whether its successful or failed after process finish.
      *
-     * @param event
+     * @param event Event
      *
      */
 
@@ -62,7 +62,7 @@ public class KafkaProducerService {
      * send it
      * logging whether its successful or failed after process finish.
      *
-     * @param event
+     * @param event Event
      *
      */
 
@@ -82,7 +82,7 @@ public class KafkaProducerService {
      * send it
      * logging whether its successful or failed after process finish.
      *
-     * @param event
+     * @param event Event
      *
      */
 
@@ -102,7 +102,7 @@ public class KafkaProducerService {
      * send it
      * logging whether its successful or failed after process finish.
      *
-     * @param event
+     * @param event Event
      *
      */
 

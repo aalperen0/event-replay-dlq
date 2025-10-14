@@ -35,27 +35,31 @@ public class RedisLockService {
     }
 
 
-
     /**
-     *  Release lock manually
+     * Release lock manually
+     *
      * @param lockKey The Lock Key
      */
     public void releaseLock(String lockKey) {
         Boolean deleted = redisTemplate.delete(lockKey);
-        if(deleted) {
+        if (deleted) {
             log.debug("{} has been released", lockKey);
-        }else{
+        } else {
             log.debug("{} not found ", lockKey);
         }
     }
 
     /**
      * Get remaining TTL of lock
+     *
      * @param lockKey The Lock KEY
      * @return TTL in seconds, -1 if no expiration, -2 if key doesn't exist
      */
     public Long getLockTTL(String lockKey) {
         return redisTemplate.getExpire(lockKey, TimeUnit.SECONDS);
     }
+
+
+
 
 }

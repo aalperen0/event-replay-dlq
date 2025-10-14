@@ -11,8 +11,13 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 
 /**
+ * ------ THIS PROCESSOR IS JUST FOR A SIMULATING PROCESS !
  * Processing events based on Orders
  * If order processor can process the job,
  * Check the json payload
@@ -25,6 +30,7 @@ import org.springframework.stereotype.Service;
 public class OrderEventProcessor implements EventProcessor {
 
     private final ObjectMapper objectMapper;
+    private Map<String, Integer> attemptTracker = new ConcurrentHashMap<>();
 
     public OrderEventProcessor(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
@@ -63,6 +69,17 @@ public class OrderEventProcessor implements EventProcessor {
             }
             if (customerId == null || customerId.isBlank()) {
                 throw new ProcessingException("Invalid CUSTOMER_ID: CUSTOMER ID is null or blank");
+            }
+
+            if (orderId.contains("retry-test")){
+                int attempts = attemptTracker.compute(orderId, (key, value) -> value == null ? 1 : value + 1);
+                if (attempts < 3){
+
+                    throw new ProcessingException("Temporary failure simulated (attempt " + attempts + ")");
+                }
+
+                attemptTracker.remove(orderId);
+                log.info("Succeeded on attempt 3");
             }
 
 

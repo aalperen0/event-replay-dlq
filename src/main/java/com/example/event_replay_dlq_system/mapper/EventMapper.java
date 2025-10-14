@@ -6,6 +6,7 @@ import com.example.event_replay_dlq_system.dto.EventPublishRequestDTO;
 import com.example.event_replay_dlq_system.dto.EventPublishResponseDTO;
 import com.example.event_replay_dlq_system.entity.Event;
 import com.example.event_replay_dlq_system.entity.EventProcessingLog;
+import com.example.event_replay_dlq_system.entity.ReplayEvent;
 import com.example.event_replay_dlq_system.enums.ProcessingStatus;
 import lombok.Builder;
 
@@ -32,6 +33,8 @@ public class EventMapper {
         event.setVersion(1);
         return event;
     }
+
+
 
     /**
      *
@@ -69,7 +72,7 @@ public class EventMapper {
     /**
      * Convert Event to the response
      *
-     * @param event Event$A
+     * @param event Event
      * @return current situation of event
      */
     public static EventPublishResponseDTO mapToEventPublishResponseDTO(Event event) {
