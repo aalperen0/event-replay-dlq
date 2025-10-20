@@ -3,10 +3,7 @@ package com.example.event_replay_dlq_system.entity;
 
 import com.example.event_replay_dlq_system.enums.DLQStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -18,6 +15,7 @@ import java.time.LocalDateTime;
 })
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class DeadLetterQueue extends BaseEntity {
@@ -50,4 +48,7 @@ public class DeadLetterQueue extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "dlq_status", nullable = false, length = 20)
     private DLQStatus dlqStatus = DLQStatus.ACTIVE;
+
+    @Column(name = "archive_reason", columnDefinition = "TEXT")
+    private String archiveReason;
 }

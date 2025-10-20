@@ -1,5 +1,7 @@
 package com.example.event_replay_dlq_system.service;
 
+import com.example.event_replay_dlq_system.dto.DLQEventDTO;
+import com.example.event_replay_dlq_system.entity.DeadLetterQueue;
 import com.example.event_replay_dlq_system.entity.Event;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -62,17 +64,17 @@ public class KafkaProducerService {
      * send it
      * logging whether its successful or failed after process finish.
      *
-     * @param event Event
+     * @param dlqEvent Event
      *
      */
 
-    public void publishDLQEvent(Event event) {
+    public void sendDLQEvent(DLQEventDTO dlqEvent) {
         try {
-            log.debug("Publishing DLQ event to Kafka: {}", event.getEventId());
-            kafkaTemplate.send(dlqTopic.name(), event.getEventId(), event);
+            log.debug("Publishing DLQ event to Kafka: {}", dlqEvent.getEventId());
+            kafkaTemplate.send(dlqTopic.name(), dlqEvent.getEventId(), dlqEvent);
         } catch (Exception e) {
-            log.error("Error publishing DLQ event to kafka: eventId:{}", event.getEventId());
-            throw new KafkaException("Error publishing DLQ event " + event.getEventId(), e);
+            log.error("Error publishing DLQ event to kafka: eventId:{}", dlqEvent.getEventId());
+            throw new KafkaException("Error publishing DLQ event " + dlqEvent.getEventId(), e);
         }
     }
 

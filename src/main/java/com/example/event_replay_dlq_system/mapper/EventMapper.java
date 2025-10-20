@@ -1,9 +1,7 @@
 package com.example.event_replay_dlq_system.mapper;
 
-import com.example.event_replay_dlq_system.dto.EventDetailResponse;
-import com.example.event_replay_dlq_system.dto.EventProcessingLogResponse;
-import com.example.event_replay_dlq_system.dto.EventPublishRequestDTO;
-import com.example.event_replay_dlq_system.dto.EventPublishResponseDTO;
+import com.example.event_replay_dlq_system.dto.*;
+import com.example.event_replay_dlq_system.entity.DeadLetterQueue;
 import com.example.event_replay_dlq_system.entity.Event;
 import com.example.event_replay_dlq_system.entity.EventProcessingLog;
 import com.example.event_replay_dlq_system.entity.ReplayEvent;
@@ -33,7 +31,6 @@ public class EventMapper {
         event.setVersion(1);
         return event;
     }
-
 
 
     /**
@@ -98,5 +95,18 @@ public class EventMapper {
                 .nextRetryTime(log.getNextRetryTime())
                 .build();
     }
+
+
+    public static DLQEventDTO toDLQEventDTO(DeadLetterQueue dlq) {
+        return DLQEventDTO.builder()
+                .eventId(dlq.getEventId())
+                .processorName(dlq.getProcessorName())
+                .processorName(dlq.getOriginalPayload())
+                .failureReason(dlq.getFailureReason())
+                .totalAttempts(dlq.getTotalAttempts())
+                .dlqStatus(dlq.getDlqStatus())
+                .build();
+    }
+
 
 }

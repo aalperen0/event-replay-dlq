@@ -24,14 +24,16 @@ public class EventProcessingService {
     private final RedisLockService redisLockService;
     private final List<EventProcessor> processors;
     private final RetrySchedulerService retrySchedulerService;
+    private final DLQService dLQService;
 
 
     @Autowired
-    public EventProcessingService(EventProcessingLogRepository eventProcessingLogRepository, RedisLockService redisLockService, List<EventProcessor> processors, RetrySchedulerService retrySchedulerService) {
+    public EventProcessingService(EventProcessingLogRepository eventProcessingLogRepository, RedisLockService redisLockService, List<EventProcessor> processors, RetrySchedulerService retrySchedulerService, DLQService dLQService) {
         this.eventProcessingLogRepository = eventProcessingLogRepository;
         this.redisLockService = redisLockService;
         this.processors = processors;
         this.retrySchedulerService = retrySchedulerService;
+        this.dLQService = dLQService;
     }
 
 
@@ -182,10 +184,8 @@ public class EventProcessingService {
 
         } else {
             log.warn("Max attempts reached, moving to DLQ {}", event.getEventId());
-            eLog.setStatus(ProcessingStatus.DLQ);
-            // .........................
-            // TODO: Move TO DLQ
-            // .........................
+
+            dLQService.moveToDLQ(event, processorName, e.getMessage(), eLog.getAttemptCount());
         }
 
 

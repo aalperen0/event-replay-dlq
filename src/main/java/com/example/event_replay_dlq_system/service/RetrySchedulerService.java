@@ -81,7 +81,7 @@ public class RetrySchedulerService {
         try {
             Set<String> redisRetryKeys = redisTemplate.keys("event:retry:*");
             if (redisRetryKeys.isEmpty()) {
-                log.debug("No retry keys found");
+                // log.debug("No retry keys found");
                 return;
             }
 
