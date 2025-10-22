@@ -13,7 +13,7 @@ public class DLQConsumer {
 
     @KafkaListener(topics = "${event-system.kafka.topics.dlq}")
     public void consumeDLQEvent(DLQEventDTO dlqEvent, Acknowledgment ack){
-        log.error(" DLQ EVENT ALERT!!! ");
+        log.error("\uD83D\uDEA8 DLQ EVENT ALERT!!!");
         log.error("Event ID: {}", dlqEvent.getEventId());
         log.error("Processor: {}", dlqEvent.getProcessorName());
         log.error("Failure Reason: {}", dlqEvent.getFailureReason());

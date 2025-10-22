@@ -13,6 +13,8 @@ import com.example.event_replay_dlq_system.exception.EventProcessingLogNotFoundE
 import com.example.event_replay_dlq_system.mapper.EventMapper;
 import com.example.event_replay_dlq_system.repository.EventProcessingLogRepository;
 import com.example.event_replay_dlq_system.repository.EventRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -34,7 +36,7 @@ public class EventPublisherService {
     private final EventProcessingLogRepository eventProcessingLogRepository;
 
     @Autowired
-    public EventPublisherService(EventRepository eventRepository, EventProcessingLogRepository eventProcessingLogRepository,  KafkaProducerService kafkaProducerService) {
+    public EventPublisherService(EventRepository eventRepository, EventProcessingLogRepository eventProcessingLogRepository, KafkaProducerService kafkaProducerService) {
         this.eventRepository = eventRepository;
         this.kafkaProducerService = kafkaProducerService;
         this.eventProcessingLogRepository = eventProcessingLogRepository;
@@ -59,11 +61,7 @@ public class EventPublisherService {
             event = eventRepository.save(event);
 
 
-
-
-
             kafkaProducerService.sendEvent(event);
-
 
 
             return EventMapper.mapToEventPublishResponseDTO(event);
@@ -121,6 +119,17 @@ public class EventPublisherService {
         return logs.stream()
                 .map(EventMapper::toProcessingLogResponse)
                 .toList();
+    }
+
+    public void updateEvent(String eventId, Object payload) {
+        Event event = eventRepository.getEventByEventId(eventId).orElseThrow(() -> new EventNotFoundException("event not found with id " + eventId));
+        try {
+            String payloadJson = new ObjectMapper().writeValueAsString(payload);
+            event.setPayload(payloadJson);
+            eventRepository.save(event);
+        }catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to update event payload", e);
+        }
     }
 
 }

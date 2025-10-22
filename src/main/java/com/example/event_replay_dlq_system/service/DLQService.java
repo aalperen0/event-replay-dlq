@@ -41,10 +41,10 @@ public class DLQService {
 
     public void moveToDLQ(Event event, String processorName, String failureReason, int totalAttempts) {
 
-        log.info("DLQ EVENT ALERT");
 
         EventProcessingLog eventLog = eventProcessingLogRepository.getByEventIdAndProcessorName(event.getEventId(), processorName).orElseThrow();
-
+        eventLog.setStatus(ProcessingStatus.DLQ);
+        eventProcessingLogRepository.save(eventLog);
 
         DeadLetterQueue dlqEvent = DeadLetterQueue.builder()
                 .eventId(event.getEventId())
@@ -57,40 +57,24 @@ public class DLQService {
                 .dlqStatus(DLQStatus.ACTIVE).build();
 
         deadLetterQueueRepository.save(dlqEvent);
-
-
-        eventLog.setStatus(ProcessingStatus.DLQ);
-        eventProcessingLogRepository.save(eventLog);
-
         DLQEventDTO dlqEventDTO = EventMapper.toDLQEventDTO(dlqEvent);
         dlqEventDTO.setMovedToDLQAt(LocalDateTime.now());
 
         log.info("Event moved to DLQ: {}", event.getEventId());
 
-        try {
-            kafkaProducerService.sendDLQEvent(dlqEventDTO);
-            log.info("DLQ event sent to kafka {}", dlqEvent.getEventId());
-        } catch (Exception e) {
-            log.error("Failed to sending DLQ", e);
-        }
+        kafkaProducerService.sendDLQEvent(dlqEventDTO);
 
     }
 
     public void retryDLQEvent(String eventId) {
+
         DeadLetterQueue dlqEntry = deadLetterQueueRepository.findByEventId(eventId)
                 .orElseThrow(() -> new DLQNotFoundException("DLQ NOT FOUND with eventId" + eventId));
 
         Event originalEvent = eventRepository.getEventByEventId(eventId)
                 .orElseThrow(() -> new EventNotFoundException("Event not found with eventId" + eventId));
 
-
-        Event retryEvent = new Event();
-        retryEvent.setEventId(originalEvent.getEventId());
-        retryEvent.setEventType(originalEvent.getEventType());
-        retryEvent.setPayload(dlqEntry.getOriginalPayload());
-        retryEvent.setSourceSystem(originalEvent.getSourceSystem());
-        retryEvent.setCorrelationId(originalEvent.getCorrelationId());
-        retryEvent.setVersion(originalEvent.getVersion());
+        dlqEntry.setOriginalPayload(originalEvent.getPayload());
 
         EventProcessingLog eLog = eventProcessingLogRepository.getByEventIdAndProcessorName(eventId, dlqEntry.getProcessorName()).orElseThrow();
         eLog.setStatus(ProcessingStatus.PENDING);
@@ -100,13 +84,9 @@ public class DLQService {
         eventProcessingLogRepository.save(eLog);
 
         dlqEntry.setDlqStatus(DLQStatus.RETRIED);
+        deadLetterQueueRepository.save(dlqEntry);
 
-        try {
-            kafkaProducerService.sendEvent(retryEvent);
-            log.info("RETRY event sent to kafka {}", retryEvent.getEventId());
-        } catch (Exception e) {
-            log.error("Failed to sending retry for DLQ", e);
-        }
+        kafkaProducerService.sendEvent(originalEvent);
 
         log.info("Manual retry triggered for DLQ event: {}", eventId);
 

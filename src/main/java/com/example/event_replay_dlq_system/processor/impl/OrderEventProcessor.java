@@ -57,6 +57,7 @@ public class OrderEventProcessor implements EventProcessor {
             String orderId = orderJson.get("orderId").asText();
             String customerId = orderJson.get("customerId").asText();
             double amount = orderJson.get("amount").asDouble();
+            log.debug("--> Amount received: {}", amount);
 
             if (amount <= 0) {
                 throw new ProcessingException("Amount must be greater than or equal to 0");

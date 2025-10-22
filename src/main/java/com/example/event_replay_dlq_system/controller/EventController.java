@@ -1,10 +1,7 @@
 package com.example.event_replay_dlq_system.controller;
 
 
-import com.example.event_replay_dlq_system.dto.EventDetailResponse;
-import com.example.event_replay_dlq_system.dto.EventProcessingLogResponse;
-import com.example.event_replay_dlq_system.dto.EventPublishRequestDTO;
-import com.example.event_replay_dlq_system.dto.EventPublishResponseDTO;
+import com.example.event_replay_dlq_system.dto.*;
 import com.example.event_replay_dlq_system.entity.Event;
 import com.example.event_replay_dlq_system.entity.EventProcessingLog;
 import com.example.event_replay_dlq_system.repository.EventRepository;
@@ -53,5 +50,12 @@ public class EventController {
     public ResponseEntity<List<EventProcessingLogResponse>> getEventStatus(@PathVariable String eventId) {
         List<EventProcessingLogResponse> logs = eventPublisherService.getEventProcessingStatus(eventId);
         return ResponseEntity.ok(logs);
+    }
+
+    @PatchMapping("/events/{eventId}")
+    public ResponseEntity<Void> updateEventManually(@PathVariable String eventId, @RequestBody EventUpdateDTO dto) {
+        eventPublisherService.updateEvent(eventId, dto.getPayload());
+
+        return ResponseEntity.noContent().build();
     }
 }

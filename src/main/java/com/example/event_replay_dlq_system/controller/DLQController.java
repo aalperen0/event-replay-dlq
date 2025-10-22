@@ -34,7 +34,7 @@ public class DLQController {
     }
 
     @PostMapping("/dlq/{eventId}/archive")
-    public ResponseEntity<String> archiveDLQ(@PathVariable String eventId, @RequestParam String archiveReason) {
+    public ResponseEntity<String> archiveDLQ(@PathVariable String eventId, @RequestBody String archiveReason) {
         dlqService.archiveDLQEvent(eventId, archiveReason);
         return ResponseEntity.ok("DLQ Event archived: " + eventId);
 

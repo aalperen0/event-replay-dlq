@@ -22,6 +22,7 @@ public class RetryEventConsumer {
 
     @KafkaListener(topics = "${event-system.kafka.topics.retry}")
     public void consumeEventRetry(Event event, Acknowledgment ack) {
+        log.info("----- retry -----");
         log.info("Received RETRY event: {}", event.getEventId());
         eventProcessingService.processEvent(event, ack);
     }

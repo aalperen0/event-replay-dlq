@@ -185,6 +185,9 @@ public class EventProcessingService {
         } else {
             log.warn("Max attempts reached, moving to DLQ {}", event.getEventId());
 
+            eLog.setStatus(ProcessingStatus.DLQ);
+            eventProcessingLogRepository.save(eLog);
+
             dLQService.moveToDLQ(event, processorName, e.getMessage(), eLog.getAttemptCount());
         }
 
