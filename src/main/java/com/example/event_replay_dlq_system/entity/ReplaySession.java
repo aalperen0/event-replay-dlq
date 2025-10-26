@@ -1,12 +1,14 @@
 package com.example.event_replay_dlq_system.entity;
 
 
+import com.example.event_replay_dlq_system.config.EventFilterConverter;
 import com.example.event_replay_dlq_system.enums.ReplaySessionStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Type;
 
 import java.time.LocalDateTime;
 
@@ -38,6 +40,7 @@ public class ReplaySession extends BaseEntity {
     @Column(nullable = false, length = 20)
     private ReplaySessionStatus status = ReplaySessionStatus.CREATED;
 
+    @Convert(converter = EventFilterConverter.class)
     @Column(name = "event_filter", columnDefinition = "TEXT")
     private String eventFilter;
 

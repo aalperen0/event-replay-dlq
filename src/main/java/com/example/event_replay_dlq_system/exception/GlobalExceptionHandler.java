@@ -37,6 +37,18 @@ public class GlobalExceptionHandler {
     }
 
 
+    @ExceptionHandler(ReplaySessionNotFoundException.class)
+    public ResponseEntity<CustomErrorResponse> dlqNotFoundException(ReplaySessionNotFoundException ex) {
+        CustomErrorResponse errorResponse = CustomErrorResponse.builder()
+                .message(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.NOT_FOUND.value())
+                .build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<CustomErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
         CustomErrorResponse errorResponse = CustomErrorResponse.builder()

@@ -3,6 +3,7 @@ package com.example.event_replay_dlq_system.service;
 import com.example.event_replay_dlq_system.dto.DLQEventDTO;
 import com.example.event_replay_dlq_system.entity.DeadLetterQueue;
 import com.example.event_replay_dlq_system.entity.Event;
+import com.example.event_replay_dlq_system.entity.ReplayEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,7 +89,7 @@ public class KafkaProducerService {
      *
      */
 
-    public void sendReplayTopic(Event event) {
+    public void sendReplayEvent(Event event) {
         try {
             log.debug("Publishing replay event to Kafka: {}", event.getEventId());
             kafkaTemplate.send(replayTopic.name(), event.getEventId(), event);
