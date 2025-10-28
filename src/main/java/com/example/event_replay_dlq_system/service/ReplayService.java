@@ -13,6 +13,7 @@ import com.example.event_replay_dlq_system.exception.ReplaySessionNotFoundExcept
 import com.example.event_replay_dlq_system.repository.EventRepository;
 import com.example.event_replay_dlq_system.repository.ReplayEventRepository;
 import com.example.event_replay_dlq_system.repository.ReplaySessionRepository;
+import com.example.event_replay_dlq_system.specification.EventSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.filter.ApplicationContextHeaderFilter;
@@ -31,36 +32,37 @@ public class ReplayService {
     private final ReplaySessionRepository replaySessionRepository;
     private final ReplayEventRepository replayEventRepository;
     private final KafkaProducerService kafkaProducerService;
-    private final ApplicationContextHeaderFilter applicationContextIdFilter;
     private final EventRepository eventRepository;
 
 
     @Autowired
-    public ReplayService(ReplaySessionRepository replaySessionRepository, ReplayEventRepository replayEventRepository, KafkaProducerService kafkaProducerService, ApplicationContextHeaderFilter applicationContextIdFilter, EventRepository eventRepository) {
+    public ReplayService(ReplaySessionRepository replaySessionRepository, ReplayEventRepository replayEventRepository, KafkaProducerService kafkaProducerService, EventRepository eventRepository) {
         this.replaySessionRepository = replaySessionRepository;
         this.replayEventRepository = replayEventRepository;
         this.kafkaProducerService = kafkaProducerService;
-        this.applicationContextIdFilter = applicationContextIdFilter;
         this.eventRepository = eventRepository;
     }
 
+    public List<ReplayEvent> getAllReplayEvents() {
+        return replayEventRepository.findAll();
+    }
 
     public ReplaySession createReplaySession(ReplaySessionRequestDTO request) {
 
-        EventFilterConverter converter = new EventFilterConverter();
 
         ReplaySession replaySession = new ReplaySession();
         replaySession.setSessionId(UUID.randomUUID().toString());
         replaySession.setName(request.getName());
         replaySession.setDescription(request.getDescription());
         replaySession.setCreatedBy(request.getCreatedBy());
-        replaySession.setEventFilter(converter.convertToDatabaseColumn(request.getEventFilter()));
+        replaySession.setEventFilter(request.getEventFilter());
 
         replaySession.setStatus(ReplaySessionStatus.CREATED);
         replaySession.setTotalEvents(0);
         replaySession.setProcessedEvents(0);
         replaySession.setSuccessfulEvents(0);
         replaySession.setFailedEvents(0);
+
 
         return replaySessionRepository.save(replaySession);
     }
@@ -83,13 +85,9 @@ public class ReplayService {
         }
 
 
-        EventFilterConverter converter = new EventFilterConverter();
-        EventFilter filter = converter.convertToEntityAttribute(session.getEventFilter());
+        EventFilter filter = session.getEventFilter();
 
-        List<Event> events = eventRepository.findByFilterCriteria(filter.getEventType(),
-                filter.getFromDate(),
-                filter.getToDate(),
-                filter.getSourceSystem());
+        List<Event> events = eventRepository.findAll(EventSpecification.byFilter(filter));
 
 
         session.setStatus(ReplaySessionStatus.RUNNING);

@@ -12,4 +12,6 @@ public interface DeadLetterQueueRepository extends JpaRepository<DeadLetterQueue
     List<DeadLetterQueue> findByDlqStatus(DLQStatus dlqStatus);
 
     Optional<DeadLetterQueue> findByEventId(String eventId);
+
+    void deleteByEventId(String eventId);
 }

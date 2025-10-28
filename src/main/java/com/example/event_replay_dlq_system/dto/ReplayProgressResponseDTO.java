@@ -21,5 +21,4 @@ public class ReplayProgressResponseDTO {
     private double progressPercentage;
     private LocalDateTime startedAt;
     private LocalDateTime endedAt;
-    //   private Duration estimatedTimeRemaining;
 }

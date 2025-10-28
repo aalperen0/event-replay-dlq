@@ -42,7 +42,7 @@ public class ReplaySession extends BaseEntity {
 
     @Convert(converter = EventFilterConverter.class)
     @Column(name = "event_filter", columnDefinition = "TEXT")
-    private String eventFilter;
+    private EventFilter eventFilter;
 
     @Column(name = "total_events", nullable = false)
     private int totalEvents = 0;

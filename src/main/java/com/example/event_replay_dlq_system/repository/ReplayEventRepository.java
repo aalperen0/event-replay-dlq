@@ -7,9 +7,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ReplayEventRepository extends JpaRepository<ReplayEvent, Long> {
-    ReplayEvent findBySessionId(String sessionId);
 
     List<ReplayEvent> findBySessionIdAndStatus(String sessionId, ProcessingStatus processingStatus);
 
     long countBySessionIdAndStatus(String sessionId, ProcessingStatus status);
+
+    List<ReplayEvent> findByEventId(String eventId);
+
+    List<ReplayEvent> findAllBySessionId(String sessionId);
 }
