@@ -15,6 +15,7 @@ import com.example.event_replay_dlq_system.repository.EventProcessingLogReposito
 import com.example.event_replay_dlq_system.repository.EventRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -137,6 +138,13 @@ public class DLQService {
         deadLetterQueueRepository.save(deadLetterQueue);
 
         log.info("DLQ event archived, can not be retried: {}", eventId);
+    }
+
+    @Scheduled(cron = "0 0 2 * * ?")
+    public void cleanUpExpiredDLQEvents() {
+        LocalDateTime cutoff = LocalDateTime.now();
+        deadLetterQueueRepository.deleteByApproximateRetentionTimeBefore(cutoff);
+        log.info("Cleaned up expired DLQ objects");
     }
 
 }

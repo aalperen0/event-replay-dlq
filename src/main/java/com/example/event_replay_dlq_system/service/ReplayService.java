@@ -116,6 +116,11 @@ public class ReplayService {
         return session;
     }
 
+    /**
+     * pause replay session
+     * @param sessionId
+     */
+
     public void pauseReplaySession(String sessionId) {
         ReplaySession session = replaySessionRepository.findBySessionId(sessionId).orElseThrow(
                 () -> new ReplaySessionNotFoundException("Session not found with Id:" + sessionId)

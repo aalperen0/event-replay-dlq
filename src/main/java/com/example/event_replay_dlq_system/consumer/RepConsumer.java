@@ -4,6 +4,7 @@ import com.example.event_replay_dlq_system.entity.DeadLetterQueue;
 import com.example.event_replay_dlq_system.entity.Event;
 import com.example.event_replay_dlq_system.entity.ReplayEvent;
 import com.example.event_replay_dlq_system.entity.ReplaySession;
+import com.example.event_replay_dlq_system.enums.DLQStatus;
 import com.example.event_replay_dlq_system.enums.ProcessingStatus;
 import com.example.event_replay_dlq_system.enums.ReplaySessionStatus;
 import com.example.event_replay_dlq_system.exception.DLQNotFoundException;
@@ -169,16 +170,18 @@ public class RepConsumer {
         List<ReplayEvent> event = replayEventRepository.findAllBySessionId(sessionId);
 
         for (ReplayEvent re : event) {
+            DeadLetterQueue dlqEntry = deadLetterQueueRepository.findByEventId(re.getEventId())
+                    .orElseThrow(() -> new DLQNotFoundException("DLQ NOT FOUND with eventId" + re.getEventId()));
+
             if (re.getStatus().equals(ProcessingStatus.SUCCESS)) {
                 deadLetterQueueRepository.deleteByEventId(re.getEventId());
             }
 
             if (re.getStatus().equals(ProcessingStatus.FAILED)) {
-                DeadLetterQueue dlqEntry = deadLetterQueueRepository.findByEventId(re.getEventId())
-                        .orElseThrow(() -> new DLQNotFoundException("DLQ NOT FOUND with eventId" + re.getEventId()));
-
+                dlqEntry.setDlqStatus(DLQStatus.ARCHIVED);
                 dlqEntry.setLastFailureTime(LocalDateTime.now());
                 dlqEntry.setTotalAttempts(dlqEntry.getTotalAttempts() + 1);
+                dlqEntry.setArchiveReason("Can not be processed");
             }
         }
 
@@ -209,7 +212,7 @@ public class RepConsumer {
                     session.getFailedEvents()
             );
         }
-
     }
+
 
 }

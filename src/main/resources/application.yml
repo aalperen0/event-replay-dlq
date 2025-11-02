@@ -42,12 +42,28 @@ spring:
   flyway:
     enabled: false
 
+
+
   #REDIS
   data:
     redis:
       host: localhost
       port: 6379
       timeout: 2000ms
+
+  mail:
+    host: sandbox.smtp.mailtrap.io
+    port: 2525
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+
 
 #SERVER PORT
 server:
@@ -60,6 +76,16 @@ event-system:
       retry: "events-retry-topic"
       dlq: "events-dlq-topic"
       replay: "events-replay-topic"
+
+alert:
+  channels:
+    log:
+      enabled: true
+    email:
+      enabled: true
+      from: noreply-event@dlq.com
+      to: your-email@example.com
+
 
 
 #LOGGING

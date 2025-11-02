@@ -51,4 +51,7 @@ public class DeadLetterQueue extends BaseEntity {
 
     @Column(name = "archive_reason", columnDefinition = "TEXT")
     private String archiveReason;
+
+    @Column(name = "approximate_retention_time")
+    private LocalDateTime approximateRetentionTime = LocalDateTime.now().plusDays(30);
 }
