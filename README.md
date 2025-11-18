@@ -130,5 +130,5 @@ GET /replay/progress/{sessionId}
 ## 👤 Author
 
 **Alperen Yücel**
-- GitHub: [@aalperen0](https://github.com/aalperen0)
+
 
