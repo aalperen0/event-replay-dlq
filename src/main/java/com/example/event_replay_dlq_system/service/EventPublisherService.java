@@ -7,9 +7,7 @@ import com.example.event_replay_dlq_system.dto.EventPublishRequestDTO;
 import com.example.event_replay_dlq_system.dto.EventPublishResponseDTO;
 import com.example.event_replay_dlq_system.entity.Event;
 import com.example.event_replay_dlq_system.entity.EventProcessingLog;
-import com.example.event_replay_dlq_system.enums.ProcessingStatus;
 import com.example.event_replay_dlq_system.exception.EventNotFoundException;
-import com.example.event_replay_dlq_system.exception.EventProcessingLogNotFoundException;
 import com.example.event_replay_dlq_system.mapper.EventMapper;
 import com.example.event_replay_dlq_system.repository.EventProcessingLogRepository;
 import com.example.event_replay_dlq_system.repository.EventRepository;
@@ -17,14 +15,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.producer.KafkaProducer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @Service
@@ -127,9 +122,11 @@ public class EventPublisherService {
             String payloadJson = new ObjectMapper().writeValueAsString(payload);
             event.setPayload(payloadJson);
             eventRepository.save(event);
-        }catch (JsonProcessingException e) {
+        } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to update event payload", e);
         }
     }
+
+
 
 }

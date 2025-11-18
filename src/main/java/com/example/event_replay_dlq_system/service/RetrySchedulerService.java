@@ -95,7 +95,7 @@ public class RetrySchedulerService {
         }
     }
 
-    private void processRetryKey(String retryKey) {
+    protected void processRetryKey(String retryKey) {
         try {
             long ttl = redisTemplate.getExpire(retryKey);
             // key doesn't exist

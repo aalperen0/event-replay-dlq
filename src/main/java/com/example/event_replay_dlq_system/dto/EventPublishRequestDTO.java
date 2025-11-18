@@ -18,6 +18,7 @@ import lombok.*;
 
 @Data
 @NoArgsConstructor
+@Builder
 @AllArgsConstructor
 public class EventPublishRequestDTO {
     @NotBlank(message = "Event Type is required")

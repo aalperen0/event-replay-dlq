@@ -2,10 +2,7 @@ package com.example.event_replay_dlq_system.entity;
 
 import com.example.event_replay_dlq_system.enums.ProcessingStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -26,6 +23,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class EventProcessingLog extends BaseEntity {
 
     @Id

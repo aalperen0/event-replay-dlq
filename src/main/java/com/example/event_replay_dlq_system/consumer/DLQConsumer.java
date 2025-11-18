@@ -2,6 +2,7 @@ package com.example.event_replay_dlq_system.consumer;
 
 
 import com.example.event_replay_dlq_system.dto.DLQEventDTO;
+import com.example.event_replay_dlq_system.service.NotificationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
@@ -10,6 +11,12 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 public class DLQConsumer {
+
+    private final NotificationService notificationService;
+
+    public DLQConsumer(NotificationService notificationService) {
+        this.notificationService = notificationService;
+    }
 
     @KafkaListener(topics = "${event-system.kafka.topics.dlq}")
     public void consumeDLQEvent(DLQEventDTO dlqEvent, Acknowledgment ack){
@@ -22,7 +29,7 @@ public class DLQConsumer {
         log.error("===============================================");
 
         // TODO: SEND ALERT TO ON-CALL
-        // alertService
+        notificationService.sendDLQNotification(dlqEvent);
 
         ack.acknowledge();
     }

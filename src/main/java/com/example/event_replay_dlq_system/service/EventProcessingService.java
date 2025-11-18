@@ -36,6 +36,13 @@ public class EventProcessingService {
         this.dLQService = dLQService;
     }
 
+    // NOTE:
+    // This redis lock is used for to prevent concurrent processing of same event across consumer
+    // In a distributed system model, It is not a strong distributed lock and may occasionally allow concurrent execution under failure conditions
+    // such as network delay, if GC pauses last longer than lock release expiry period,
+    // may client doesn't realise that it has expired. make some unsafe change.
+    // --Enabled Kafka idempotency
+    // --I stick with single-node locking.
 
     public void processEvent(Event event, Acknowledgment ack) {
 

@@ -15,6 +15,8 @@ import com.example.event_replay_dlq_system.repository.EventProcessingLogReposito
 import com.example.event_replay_dlq_system.repository.EventRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -31,13 +33,15 @@ public class DLQService {
     private final KafkaProducerService kafkaProducerService;
     private final DeadLetterQueueRepository deadLetterQueueRepository;
     private final EventRepository eventRepository;
+    private final NotificationService notificationService;
 
     @Autowired
-    public DLQService(EventProcessingLogRepository eventProcessingLogRepository, KafkaProducerService kafkaProducerService, DeadLetterQueueRepository deadLetterQueueRepository, EventRepository eventRepository) {
+    public DLQService(EventProcessingLogRepository eventProcessingLogRepository, KafkaProducerService kafkaProducerService, DeadLetterQueueRepository deadLetterQueueRepository, EventRepository eventRepository, NotificationService notificationService) {
         this.eventProcessingLogRepository = eventProcessingLogRepository;
         this.kafkaProducerService = kafkaProducerService;
         this.deadLetterQueueRepository = deadLetterQueueRepository;
         this.eventRepository = eventRepository;
+        this.notificationService = notificationService;
     }
 
     public void moveToDLQ(Event event, String processorName, String failureReason, int totalAttempts) {
@@ -146,5 +150,9 @@ public class DLQService {
         deadLetterQueueRepository.deleteByApproximateRetentionTimeBefore(cutoff);
         log.info("Cleaned up expired DLQ objects");
     }
+
+
+
+
 
 }

@@ -1,6 +1,7 @@
 package com.example.event_replay_dlq_system.service;
 
 
+import com.example.event_replay_dlq_system.dto.DLQEventDTO;
 import com.example.event_replay_dlq_system.entity.Alert;
 import com.example.event_replay_dlq_system.entity.DeadLetterQueue;
 import com.example.event_replay_dlq_system.entity.ReplaySession;
@@ -52,7 +53,7 @@ public class NotificationService {
         }
     }
 
-    public void sendDLQNotification(DeadLetterQueue dlqEntry) {
+    public void sendDLQNotification(DLQEventDTO dlqEntry) {
         Alert alert = Alert.builder()
                 .alertType(AlertType.DLQ_EVENT)
                 .title("Event Moved TO Dead Letter Queue")
@@ -68,8 +69,8 @@ public class NotificationService {
                         "eventId", dlqEntry.getEventId(),
                         "processor", dlqEntry.getProcessorName(),
                         "totalAttempts", dlqEntry.getTotalAttempts(),
-                        "firstFailure", dlqEntry.getFirstFailureTime(),
-                        "lastFailure", dlqEntry.getLastFailureTime()
+                        "failureReason", dlqEntry.getFailureReason(),
+                        "movedDLQAt", dlqEntry.getMovedToDLQAt()
                 ))
                 .source("DLQService")
                 .build();

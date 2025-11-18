@@ -101,7 +101,7 @@ public class EventMapper {
         return DLQEventDTO.builder()
                 .eventId(dlq.getEventId())
                 .processorName(dlq.getProcessorName())
-                .processorName(dlq.getOriginalPayload())
+                .payload(dlq.getOriginalPayload())
                 .failureReason(dlq.getFailureReason())
                 .totalAttempts(dlq.getTotalAttempts())
                 .dlqStatus(dlq.getDlqStatus())
